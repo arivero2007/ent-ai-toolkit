@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ENT Educator AI Toolkit</title>
+<meta name="description" content="AI tools by teaching setting, a prompt builder for any learning task, and a CASE framework quiz. AAO-HNSF 2026 panel: From Chatbots to Co-Pilots.">
+<meta property="og:title" content="ENT Educator AI Toolkit">
+<meta property="og:description" content="AI tools by teaching setting, a prompt builder for any learning task, and a CASE framework quiz. AAO-HNSF 2026.">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: phone-first single column. Hero, then a setting/role switcher that drives tool cards,
+   a copyable prompt library, and a tap-to-sort CASE quiz. Brand matches the session deck. */
+:root{
+  --bg:#FFF7F2; --surface:#FFFFFF; --ink:#2B2E3C; --muted:#675F5B; --line:#EBD8CA;
+  --accent:#C2560B; --accent-ink:#FFFFFF; --tint:#FCE2CF; --slate:#2C3F42;
+  --ok:#2E6A4E; --warn:#A8462A; --hero:#2B2E3C; --hero-ink:#FFF7F2; --hero-muted:#D9C3B3;
+  --display:"Bitter",Cambria,Georgia,serif; --body:"Open Sans",Calibri,"Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1C1E26; --surface:#262935; --ink:#F3EDE8; --muted:#BDB2AB; --line:#3A3D4A;
+  --accent:#F08A45; --accent-ink:#1C1E26; --tint:#3B2A1F; --slate:#9CC3C8;
+  --ok:#7FC4A0; --warn:#F2A088; --hero:#11131A; --hero-ink:#FFF7F2; --hero-muted:#BBA698; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1C1E26; --surface:#262935; --ink:#F3EDE8; --muted:#BDB2AB; --line:#3A3D4A;
+  --accent:#F08A45; --accent-ink:#1C1E26; --tint:#3B2A1F; --slate:#9CC3C8;
+  --ok:#7FC4A0; --warn:#F2A088; --hero:#11131A; --hero-ink:#FFF7F2; --hero-muted:#BBA698; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:880px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* hero */
+.hero{background:var(--hero);color:var(--hero-ink)}
+.hero .inner{padding-block:36px 32px;display:grid;gap:14px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-size:clamp(32px,7vw,52px);font-weight:700;line-height:1.08}
+.hero p{margin:0;max-width:60ch;color:var(--hero-muted)}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.jump a{font-size:14px;font-weight:700;text-decoration:none;color:var(--hero-ink);border:1px solid rgba(255,247,242,.35);border-radius:999px;padding:8px 14px}
+.jump a:hover{border-color:var(--accent)}
+
+main .inner{padding-block:32px 56px;display:grid;gap:48px}
+section{display:grid;gap:16px;scroll-margin-top:12px}
+.sec-head{display:grid;gap:6px}
+.sec-head h2{font-size:clamp(24px,4.5vw,32px);font-weight:600}
+.sec-head p{margin:0;color:var(--muted);max-width:62ch}
+
+/* rule */
+.rule{background:var(--tint);border-radius:14px;padding:16px 18px;display:grid;gap:6px}
+.rule b{font-family:var(--display);font-size:17px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:14px;color:var(--muted)}
+
+/* switcher */
+.group-label{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 15px/1 var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:10px 16px;cursor:pointer;min-height:44px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:hover{border-color:var(--accent)}
+.picker{display:grid;gap:10px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px}
+.panel-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-start;justify-content:space-between}
+.panel-top h3{font-size:24px;font-weight:600}
+.panel-use{margin:0;color:var(--muted);max-width:56ch}
+.start{font-size:14px;background:var(--tint);border-radius:10px;padding:10px 12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border-radius:999px;padding:5px 12px;white-space:nowrap;border:1.5px solid currentColor}
+.pill.baa{color:var(--ok)} .pill.deid{color:var(--warn)} .pill.none{color:var(--slate)}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tool{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start;min-width:0;background:var(--bg)}
+.tool-name{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tool-name b{font-size:17px}
+.tool-name a{font-size:13px;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.tool-name a:hover{text-decoration:underline}
+.tool p{margin:0;font-size:15px}
+
+/* prompts */
+.prompts{display:grid;gap:12px}
+.prompt{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:10px;min-width:0}
+.prompt-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.prompt-head b{font-family:var(--display);font-size:18px;font-weight:600}
+.tag{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.prompt pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font:italic 15px/1.55 var(--body);background:var(--bg);border-radius:10px;padding:12px 14px;max-height:none}
+.prompt pre.clamp{max-height:9.5em;overflow:hidden;position:relative}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:700 14px/1 var(--body);border-radius:10px;padding:11px 14px;cursor:pointer;min-height:44px;border:1.5px solid var(--ink);background:var(--ink);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.done{background:var(--ok);border-color:var(--ok);color:var(--bg)}
+
+/* quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px}
+.progress{display:flex;gap:6px}
+.progress span{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.progress span.right{background:var(--ok)} .progress span.wrong{background:var(--warn)} .progress span.now{background:var(--accent)}
+.q-count{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.q-task{font-family:var(--display);font-size:clamp(20px,4vw,24px);line-height:1.3}
+.answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ans{font:700 16px/1.2 var(--body);border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:14px 8px;cursor:pointer;display:grid;gap:4px;justify-items:center;min-height:72px}
+.ans span{font-family:var(--display);font-size:26px;line-height:1}
+.ans:hover:not(:disabled){border-color:var(--accent)}
+.ans.is-right{border-color:var(--ok);background:var(--ok);color:var(--bg)}
+.ans.is-wrong{border-color:var(--warn);color:var(--warn)}
+.ans:disabled{cursor:default}
+.feedback{border-radius:12px;padding:14px 16px;background:var(--tint)}
+.feedback b{display:block;margin-bottom:4px}
+.case-key{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.case-key div{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.case-key b{font-family:var(--display);font-size:17px;color:var(--accent)}
+.case-key p{margin:4px 0 0;font-size:14px}
+.score{font-family:var(--display);font-size:28px}
+
+/* builder */
+.builder{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.steps{display:grid;gap:12px;min-width:0}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px;min-width:0}
+.step-h{display:flex;gap:10px;align-items:center}
+.step-h .n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:700 13px/26px var(--body);text-align:center;flex:none}
+.step-h b{font-family:var(--display);font-size:17px;font-weight:600}
+.step .chips{gap:6px}
+.step .chip{font-size:14px;padding:8px 12px;min-height:40px}
+.field{font:15px var(--body);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+.field:focus{border-color:var(--accent);outline:none}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.examples{display:flex;flex-wrap:wrap;gap:6px}
+.examples button{font:600 13px var(--body);color:var(--accent);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
+.modes{display:grid;gap:8px}
+.mode{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+.mode input{margin-top:4px;accent-color:var(--accent)}
+.mode b{font-size:15px}
+.mode span{grid-column:2;font-size:13px;color:var(--muted)}
+.mode:has(input:checked){border-color:var(--accent);background:var(--tint)}
+.checks{display:grid;gap:6px}
+.checks label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.checks input{margin-top:4px;accent-color:var(--accent);width:18px;height:18px;flex:none}
+.preview{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--hero);color:var(--hero-ink);border-radius:16px;padding:18px;display:grid;gap:12px;min-width:0}
+.preview .eyebrow{color:var(--accent)}
+.preview pre{margin:0;white-space:pre-wrap;word-wrap:break-word;font:14.5px/1.6 var(--body);color:var(--hero-ink);max-height:52vh;overflow:auto}
+.preview .meta{font-size:12px;color:var(--hero-muted)}
+.preview .btn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.preview .btn.ghost{background:transparent;color:var(--hero-ink);border-color:rgba(255,247,242,.35);text-decoration:none;display:inline-flex;align-items:center}
+.preview .btn.done{background:var(--ok);border-color:var(--ok)}
+@media (max-width:760px){.builder{grid-template-columns:1fr}.preview{position:static}}
+
+footer .inner{padding-block:24px 40px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:4px}
+@media (max-width:420px){.answers{grid-template-columns:1fr}.ans{grid-template-columns:auto 1fr;justify-items:start;align-items:center;min-height:56px;padding:12px 16px;gap:12px}}
+@media (prefers-reduced-motion:no-preference){.panel,.feedback{animation:fade .25s ease-out}@keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+
+</head>
+<body>
+<header class="hero band">
+  <div class="inner">
+    <div class="eyebrow">AAO-HNSF 2026 · From Chatbots to Co-Pilots</div>
+    <h1>AI toolkit for otolaryngology educators</h1>
+    <p>The tools from the session, sorted by where you teach and what you are trying to do. Pick your setting, copy a prompt, and try sorting a few tasks with the CASE framework.</p>
+    <nav class="jump" aria-label="Sections">
+      <a href="#tools">Find a tool</a><a href="#build">Build a prompt</a><a href="#prompts">Copy a prompt</a><a href="#case">CASE quiz</a>
+    </nav>
+  </div>
+</header>
+
+<main class="band">
+<div class="inner">
+
+  <section id="tools" aria-labelledby="tools-h">
+    <div class="sec-head">
+      <h2 id="tools-h">Find a tool</h2>
+      <p>The same two tables as the slides. Choose a teaching setting or a role.</p>
+    </div>
+    <div class="rule" role="note">
+      <b>Before patient information goes in</b>
+      <span>Patient-specific details only in tools covered by a BAA or your institution's approved enterprise AI. Consumer chatbots get de-identified cases only. Never upload patient images or voices to creative tools, and clone only your own voice. Verify every output before a learner or patient sees it.</span>
+      <div class="legend"><span class="pill baa"><i></i>BAA / HIPAA options</span><span class="pill deid"><i></i>De-identified only</span><span class="pill none"><i></i>No patient data needed</span></div>
+    </div>
+    <div class="picker">
+      <div class="group-label" id="lab-set">By teaching setting</div>
+      <div class="chips" role="group" aria-labelledby="lab-set" data-group="setting"></div>
+      <div class="group-label" id="lab-role">By role</div>
+      <div class="chips" role="group" aria-labelledby="lab-role" data-group="role"></div>
+    </div>
+    <div class="panel" id="panel" aria-live="polite"></div>
+  </section>
+
+  <section id="build" aria-labelledby="build-h">
+    <div class="sec-head">
+      <h2 id="build-h">Build a prompt for any learning task</h2>
+      <p>Pick the learner, the task, and how AI should enter it. The prompt on the right updates as you go; copy it or open it straight in a chatbot.</p>
+    </div>
+    <div class="builder">
+      <form class="steps" id="pb" autocomplete="off" onsubmit="return false">
+        <div class="step">
+          <div class="step-h"><span class="n">1</span><b>Who is learning?</b></div>
+          <div class="chips" data-field="level"></div>
+        </div>
+        <div class="step">
+          <div class="step-h"><span class="n">2</span><b>What kind of learning task?</b></div>
+          <div class="chips" data-field="task"></div>
+        </div>
+        <div class="step">
+          <div class="step-h"><span class="n">3</span><b>Topic</b></div>
+          <label for="pb-topic" class="hint">A condition, procedure, or concept. Never patient identifiers.</label>
+          <input class="field" id="pb-topic" type="text" maxlength="120">
+          <div class="examples" id="pb-ex"></div>
+        </div>
+        <div class="step">
+          <div class="step-h"><span class="n">4</span><b>How should AI enter? (CASE)</b></div>
+          <div class="modes" id="pb-modes"></div>
+        </div>
+        <div class="step">
+          <div class="step-h"><span class="n">5</span><b>Ground it in</b></div>
+          <p class="hint">Pick as many as apply, or none.</p>
+          <div class="chips" data-field="ground"></div>
+        </div>
+        <div class="step">
+          <div class="step-h"><span class="n">6</span><b>Extras</b></div>
+          <div class="checks" id="pb-extras"></div>
+        </div>
+      </form>
+      <aside class="preview" aria-label="Your prompt">
+        <div class="eyebrow">Your prompt</div>
+        <pre id="pb-out"></pre>
+        <div class="meta" id="pb-meta"></div>
+        <div class="row">
+          <button class="btn" type="button" id="pb-copy">Copy prompt</button>
+          <a class="btn ghost" id="pb-claude" href="https://claude.ai" target="_blank" rel="noopener">Open in Claude ↗</a>
+          <a class="btn ghost" id="pb-gpt" href="https://chatgpt.com" target="_blank" rel="noopener">Open in ChatGPT ↗</a>
+          <button class="btn ghost" type="button" id="pb-reset">Reset</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="prompts" aria-labelledby="prompts-h">
+    <div class="sec-head">
+      <h2 id="prompts-h">Copy a prompt</h2>
+      <p>Prompts from the demos. Paste into Claude, ChatGPT, or Gemini. Use de-identified details only.</p>
+    </div>
+    <div class="prompts" id="promptList"></div>
+  </section>
+
+  <section id="case" aria-labelledby="case-h">
+    <div class="sec-head">
+      <h2 id="case-h">CASE quiz: how should AI enter this task?</h2>
+      <p>Six resident tasks. Sort each one, then read why.</p>
+    </div>
+    <div class="case-key">
+      <div><b>Conserve</b><p>AI could do the thinking we are training. Resident commits first; AI comparison afterward.</p></div>
+      <div><b>Augment</b><p>AI only widens the case set, after the resident's own read.</p></div>
+      <div><b>Surrender</b><p>The task builds no competency we are responsible for. AI drafts; resident verifies.</p></div>
+      <div><b>Evaluate</b><p>Runs through all three: appraise the output, name failure modes, calibrate reliance.</p></div>
+    </div>
+    <div class="quiz" id="quiz" aria-live="polite"></div>
+  </section>
+
+</div>
+</main>
+
+<footer class="band">
+  <div class="inner">
+    <span>Compiled by Alexander Rivero, MD, FACS, for the AAO-HNSF 2026 Annual Meeting panel "From Chatbots to Co-Pilots: How Generative AI Is Transforming Otolaryngology Education."</span>
+    <span>CASE framework: Hack S, Jamal N, Coblens O, Takashima M, Rivero A (unpublished data). Tools and features checked October 2026; they change often.</span>
+  </div>
+</footer>
+
+<script>
+const L = {
+  openevidence:["OpenEvidence","https://www.openevidence.com"], clinicians:["ChatGPT for Clinicians","https://chatgpt.com"],
+  doximity:["Doximity","https://www.doximity.com"], notebooklm:["NotebookLM","https://notebooklm.google.com"],
+  claude:["Claude","https://claude.ai"], chatgpt:["ChatGPT","https://chatgpt.com"], gemini:["Gemini","https://gemini.google.com"],
+  gemimg:["Gemini image (Nano Banana)","https://gemini.google.com"], gamma:["Gamma","https://gamma.app"], napkin:["Napkin AI","https://www.napkin.ai"],
+  deep:["Deep research modes","https://claude.ai"], consensus:["Consensus","https://consensus.app"], elicit:["Elicit","https://elicit.com"],
+  aistudio:["Google AI Studio","https://aistudio.google.com"], replit:["Replit","https://replit.com"], lovable:["Lovable","https://lovable.dev"],
+  claudecode:["Claude Code","https://www.anthropic.com/claude-code"], cursor:["Cursor","https://cursor.com"], study:["Study modes","https://chatgpt.com"],
+  elevenlabs:["ElevenLabs","https://elevenlabs.io"], heygen:["HeyGen","https://www.heygen.com"], higgsfield:["Higgsfield","https://higgsfield.ai"], descript:["Descript","https://www.descript.com"]
+};
+const ROWS = [
+  {id:"clinic", group:"setting", label:"Clinic and wards", use:"Cited point-of-care answers; OpenEvidence and ChatGPT for Clinicians award CME for evidence reviews.", phi:"baa",
+   tools:[["openevidence","Answers cited to peer-reviewed literature. Free for NPI-verified clinicians; searches can earn CME and MOC credit."],
+          ["clinicians","Free for verified US clinicians since April 2026. Cited answers, literature reviews, reusable skills for letters; BAA available."],
+          ["doximity","Evidence-grounded answers and drafting, free for verified US clinicians, with physician-reviewed responses."]]},
+  {id:"classroom", group:"setting", label:"Classroom", use:"Audio and video overviews, branching cases, voice-mode simulated patients.", phi:"deid",
+   tools:[["notebooklm","Upload a reading list; generate audio and video overviews, flashcards, quizzes, and slide decks from those sources."],
+          ["claude","Branching cases that pause for the learner's decision at each step."],
+          ["chatgpt","Voice mode as a simulated patient for history-taking practice."],
+          ["gemini","Gemini Live for voice role-play; also builds case variations quickly."]]},
+  {id:"orprep", group:"setting", label:"OR preparation", use:"Step rehearsal, “three ways this plan fails,” labeled schematics (verify labels).", phi:"deid",
+   tools:[["claude","Quiz the resident on each operative step with what-if branches."],
+          ["chatgpt","Ask it to argue against the resident's written plan."],
+          ["gemini","Same rehearsal in voice mode on the way in."],
+          ["gemimg","Labeled schematics of steps and approaches. Check every label against an atlas."]]},
+  {id:"study", group:"setting", label:"Self-study", use:"Quizzes built from AAO-HNSF guidelines; tutoring that asks questions back.", phi:"none",
+   tools:[["notebooklm","Load a clinical practice guideline and generate quizzes whose explanations cite the guideline text."],
+          ["study","Study and learning modes in ChatGPT and Claude ask questions back instead of handing over the answer."],
+          ["openevidence","Check the evidence behind a board-style answer."]]},
+  {id:"presenter", group:"role", label:"Presenter", use:"First-draft decks, PowerPoint export from your own sources, diagrams, visual abstracts.", start:"NotebookLM deck from 5 papers",
+   tools:[["gamma","Describe the talk and get a structured first-draft deck; restyle by conversation."],
+          ["notebooklm","Slide decks built from your own sources, revisable slide by slide, exported to PowerPoint."],
+          ["napkin","Turns a paragraph into an editable diagram or flow."],
+          ["gemimg","Infographics and figures with legible text inside the image."]]},
+  {id:"scholar", group:"role", label:"Scholar", use:"Cited background reports, evidence direction at a glance, data extraction tables.", start:"Consensus for journal club",
+   tools:[["deep","ChatGPT, Claude, and Gemini each run multi-step searches and return a cited report in minutes."],
+          ["consensus","Ask a yes/no clinical question and see how the literature leans."],
+          ["elicit","Finds studies and pulls sample size, design, and outcomes into a sortable table."]]},
+  {id:"builder", group:"role", label:"Builder", use:"Quizzes, feedback forms, dashboards, and tools like DebriefMD.", start:"Google AI Studio, no setup",
+   tools:[["aistudio","Describe an app and run it in the browser, with Gemini built in."],
+          ["replit","Build and host a small web app from a conversation."],
+          ["lovable","Conversation-to-web-app builder for forms and dashboards."],
+          ["claudecode","AI coding assistant for tools you will maintain and share."],
+          ["cursor","AI code editor for larger projects."]]},
+  {id:"creator", group:"role", label:"Creator", use:"Narrated modules, multilingual patient education audio, avatar lecture videos, short cinematic openers.", start:"ElevenLabs narration of a 5-minute module",
+   tools:[["elevenlabs","Natural narration from a script or PDF; dubbing into 90+ languages, including Spanish patient education. Free tier for trying it."],
+          ["heygen","Turns a script into a presenter-style video with an AI avatar, for flipped-classroom lectures."],
+          ["higgsfield","Cinematic AI video clips with camera control, built on models such as Sora and Veo. Good for openers; never for anatomy. No free plan."],
+          ["descript","Edit a recorded lecture by editing its transcript; removes filler words and adds captions."]]}
+];
+const PHI = {baa:"BAA / HIPAA options", deid:"De-identified only", none:"No patient data needed"};
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let current = "clinic";
+function renderChips(){
+  document.querySelectorAll(".picker .chips").forEach(g=>{
+    g.innerHTML = ROWS.filter(r=>r.group===g.dataset.group).map(r=>
+      `<button class="chip" type="button" id="chip-${r.id}" data-id="${r.id}" aria-pressed="${r.id===current}">${esc(r.label)}</button>`).join("");
+  });
+}
+function renderPanel(){
+  const r = ROWS.find(x=>x.id===current);
+  const badge = r.phi ? `<span class="pill ${r.phi}"><i></i>${PHI[r.phi]}</span>` : `<span class="start"><b>Start with:</b> ${esc(r.start)}</span>`;
+  document.getElementById("panel").innerHTML = `
+    <div class="panel-top"><div style="display:grid;gap:6px;min-width:0"><h3>${esc(r.label)}</h3><p class="panel-use">${esc(r.use)}</p></div>${badge}</div>
+    <div class="tools">${r.tools.map(([k,t])=>`<div class="tool"><div class="tool-name"><b>${esc(L[k][0])}</b><a href="${L[k][1]}" target="_blank" rel="noopener">Open ↗</a></div><p>${esc(t)}</p></div>`).join("")}</div>`;
+}
+document.querySelector(".picker").addEventListener("click", e=>{
+  const b = e.target.closest(".chip"); if(!b) return;
+  current = b.dataset.id; renderChips(); renderPanel();
+  try{ localStorage.setItem("entToolkitTab", current) }catch(_){}
+  document.getElementById("chip-"+current).focus();
+});
+try{ const s = localStorage.getItem("entToolkitTab"); if(s && ROWS.some(r=>r.id===s)) current = s }catch(_){}
+renderChips(); renderPanel();
+
+/* prompts */
+const PROMPTS = [
+  {t:"Simulated patient", tag:"Voice mode · Learn", long:true, p:`You are a standardized patient in a history-taking exercise for an otolaryngology resident. I will play the resident. Stay in character until I say "end encounter."
+
+CASE (do not reveal unless I specifically ask):
+- Name: Linda Torres, 52, middle school teacher
+- Chief complaint: "My right ear sounds muffled, like it's underwater."
+- Onset: noticed it on waking 2 days ago; came on all at once overnight
+- Right ear only; left ear normal
+- Ringing in the right ear since it started; mild ear fullness
+- No spinning or dizziness, no ear pain, no drainage
+- Had a cold about a week ago, now resolved
+- No head injury, no loud noise exposure, no recent flying or diving
+- No prior episodes; no prior ear surgery
+- No facial weakness, numbness, double vision, trouble speaking, or headache
+- Medications: lisinopril for blood pressure; no recent antibiotics, chemotherapy, or high-dose aspirin
+- Other history: high blood pressure, borderline diabetes; nonsmoker
+- Tried ear drops from a pharmacy, no change
+
+HOW TO BEHAVE:
+- Answer only the question asked, in 1-2 short sentences, in everyday language (no medical terms).
+- If I ask a vague or compound question, answer only the first part.
+- Sound a little worried. Once, partway through, ask: "Is this going to be permanent?"
+- Do not hint at questions I should be asking.
+
+WHEN I SAY "END ENCOUNTER":
+Step out of character and give brief feedback, under 150 words, based on the AAO-HNSF Clinical Practice Guideline on Sudden Hearing Loss:
+1. History items I covered well
+2. Key history items I missed, and why each matters
+3. The single most important next step in management`},
+  {t:"Branching case", tag:"Learn", p:"Build a branching case: 58-year-old with a new parotid mass. Pause for my decision at each step, then show the consequences."},
+  {t:"Guideline quiz", tag:"NotebookLM · Learn", p:"From the AAO-HNSF sudden hearing loss guideline, write 10 board-style questions with explanations that cite the guideline text."},
+  {t:"Step rehearsal", tag:"Plan", p:"Quiz me on the steps of a canal-wall-up tympanomastoidectomy. After each step, ask what I would do if something goes wrong."},
+  {t:"Active interrogation", tag:"Plan", p:"Here is my operative plan. Give me three reasons it might fail and the evidence for each."}
+];
+document.getElementById("promptList").innerHTML = PROMPTS.map((x,i)=>`
+  <div class="prompt">
+    <div class="prompt-head"><b>${esc(x.t)}</b><span class="tag">${esc(x.tag)}</span></div>
+    <pre id="p${i}" class="${x.long?'clamp':''}">${esc(x.p)}</pre>
+    <div class="row"><button class="btn" type="button" id="copy${i}" data-i="${i}">Copy prompt</button>${x.long?`<button class="btn ghost" type="button" id="more${i}" data-more="${i}" aria-expanded="false">Show full prompt</button>`:""}</div>
+  </div>`).join("");
+document.getElementById("promptList").addEventListener("click", e=>{
+  const c = e.target.closest("[data-i]"), m = e.target.closest("[data-more]");
+  if(m){ const pre = document.getElementById("p"+m.dataset.more); const open = pre.classList.toggle("clamp")===false;
+         m.textContent = open ? "Show less" : "Show full prompt"; m.setAttribute("aria-expanded", open); return; }
+  if(!c) return;
+  const text = PROMPTS[c.dataset.i].p;
+  const ok = ()=>{ c.textContent="Copied"; c.classList.add("done"); setTimeout(()=>{c.textContent="Copy prompt"; c.classList.remove("done")},1800) };
+  const fallback = ()=>{ const pre=document.getElementById("p"+c.dataset.i); pre.classList.remove("clamp");
+    const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); c.textContent="Selected, press copy"; };
+  try{ navigator.clipboard.writeText(text).then(ok, fallback) }catch(_){ fallback() }
+});
+
+/* prompt builder */
+const PB = {
+  level:[["ms","Medical student"],["pgy1","PGY-1"],["pgy2","PGY-2"],["pgy3","PGY-3"],["pgy4","PGY-4"],["pgy5","PGY-5"],["fellow","Fellow"],["attending","Attending (CME)"]],
+  task:[["case","Branching case"],["patient","Simulated patient"],["quiz","Board-style quiz"],["rehearse","Step rehearsal"],["critique","Critique my plan"],["socratic","Socratic tutor"],["flash","Flashcards"],["journal","Journal club"]],
+  ground:[["cpg","AAO-HNSF guideline"],["lit","Peer-reviewed literature"],["file","A document I'll attach"]],
+  examples:["sudden sensorineural hearing loss","parotid mass workup","canal-wall-up tympanomastoidectomy","pediatric obstructive sleep apnea","thyroid nodule evaluation","endoscopic sinus surgery anatomy"],
+  modes:[["conserve","Conserve","I commit to my own answer before AI gives one."],["augment","Augment","After my answer, AI widens the field with contrasting cases."],["surrender","Surrender","AI produces a complete draft; I verify every fact."]],
+  extras:[["uncertain","Tell me when you are uncertain, and never invent references."],["oneatatime","Ask one question at a time and wait for my answer."],["missed","End with what I got right, what I missed, and what to review."],["concise","Keep each reply under 150 words."]]
+};
+const PB_DEFAULT = {level:"pgy2", task:"case", topic:"sudden sensorineural hearing loss", mode:"conserve", ground:["cpg"], extras:["uncertain","oneatatime","missed"]};
+const TASK_MODE = {case:"conserve",patient:"conserve",quiz:"conserve",rehearse:"conserve",critique:"conserve",socratic:"conserve",flash:"surrender",journal:"augment"};
+let pb = Object.assign({}, PB_DEFAULT, {ground:[...PB_DEFAULT.ground], extras:[...PB_DEFAULT.extras]});
+try{ const s = JSON.parse(localStorage.getItem("entPromptBuilder")||"null"); if(s && s.level){ pb = s; if(!Array.isArray(pb.ground)) pb.ground = (pb.ground && pb.ground!=="none") ? [pb.ground] : []; } }catch(_){}
+
+function lab(list,k){ return (list.find(x=>x[0]===k)||["",""])[1] }
+function buildPrompt(){
+  const T = (pb.topic||"").trim() || "[your topic]";
+  const L = lab(PB.level,pb.level);
+  const learner = pb.level==="ms" ? "a medical student on an otolaryngology rotation" : pb.level==="attending" ? "a practicing otolaryngologist reviewing for CME" : pb.level==="fellow" ? "an otolaryngology fellow" : "an otolaryngology resident ("+L+")";
+  const lines = [`You are an experienced otolaryngology educator. I am ${learner}. Pitch the difficulty to my level.`, ""];
+  const task = {
+    case:`Run a branching clinical case on ${T}. Present it one step at a time and pause for my decision at each step before revealing what happens next.`,
+    patient:`Act as a standardized patient presenting with ${T}. Answer only what I ask, in everyday language, without hinting at what I should ask. When I say "end encounter," step out of character and give me feedback on my history and next steps.`,
+    quiz:`Write 10 board-style multiple-choice questions on ${T}. Give them to me one at a time, wait for my answer, then explain why each option is right or wrong.`,
+    rehearse:`Quiz me on the steps of ${T}. After each step, ask what I would do if a complication or unexpected finding occurs.`,
+    critique:`I will share my plan for ${T}. Give me three specific ways it could fail, the evidence for each, and what you would change.`,
+    socratic:`Teach me ${T} as a Socratic tutor. Ask questions that lead me to the key concepts instead of explaining them outright.`,
+    flash:`Make 15 flashcards on ${T}. Front: a focused question. Back: a concise answer plus one clinical pearl.`,
+    journal:`Help me prepare a journal club on ${T}. Summarize the study design, main findings with effect sizes, limitations, and how it should change practice.`
+  }[pb.task];
+  lines.push(task, "");
+  const mode = {
+    conserve:"Before you offer any answer, differential, or plan of your own, ask me to commit to mine. Only then compare yours with mine and explain the differences.",
+    augment:"After I give my own interpretation, show me two or three contrasting cases or variants so I can compare across a wider range than I would see in clinic.",
+    surrender:"Produce a complete, well-organized draft. I will verify every clinical fact before I use it, so flag anything that needs checking."
+  }[pb.mode];
+  lines.push(mode, "");
+  const ground = {
+    cpg:"Base the content on the relevant AAO-HNSF clinical practice guideline and name the key action statement for each main point. If the guideline does not address something, say so.",
+    lit:"Ground key claims in peer-reviewed literature with author and year, and say when evidence is limited or conflicting.",
+    file:"Use the document I have attached as the primary source. If it does not cover something, say so instead of filling the gap."
+  };
+  const g = pb.ground.filter(k=>ground[k]);
+  g.forEach(k=>lines.push(ground[k]));
+  if(g.length>1) lines.push("Where these sources disagree, point out the disagreement.");
+  const ex = {uncertain:"Tell me when you are uncertain, and never invent references.",oneatatime:"Ask one question at a time and wait for my answer.",missed:"When we finish, summarize what I got right, what I missed, and what to review.",concise:"Keep each reply under 150 words."};
+  const chosen = pb.extras.filter(k=>ex[k]);
+  if(chosen.length){ lines.push(""); chosen.forEach(k=>lines.push("- "+ex[k])); }
+  return lines.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+}
+function renderBuilder(){
+  document.querySelectorAll("#pb .chips").forEach(g=>{
+    const f = g.dataset.field;
+    g.innerHTML = PB[f].map(([k,l])=>`<button class="chip" type="button" id="pb-${f}-${k}" data-f="${f}" data-k="${k}" aria-pressed="${Array.isArray(pb[f])?pb[f].includes(k):pb[f]===k}">${esc(l)}</button>`).join("");
+  });
+  const topic = document.getElementById("pb-topic"); if(document.activeElement!==topic) topic.value = pb.topic;
+  document.getElementById("pb-ex").innerHTML = PB.examples.map(e=>`<button type="button" data-ex="${esc(e)}">${esc(e)}</button>`).join("");
+  document.getElementById("pb-modes").innerHTML = PB.modes.map(([k,l,d])=>`<label class="mode" for="pb-mode-${k}"><input type="radio" name="pbmode" id="pb-mode-${k}" value="${k}" ${pb.mode===k?"checked":""}><b>${l}</b><span>${d}</span></label>`).join("");
+  document.getElementById("pb-extras").innerHTML = PB.extras.map(([k,l])=>`<label for="pb-x-${k}"><input type="checkbox" id="pb-x-${k}" value="${k}" ${pb.extras.includes(k)?"checked":""}>${esc(l)}</label>`).join("");
+  updateOut();
+}
+function updateOut(){
+  const p = buildPrompt();
+  document.getElementById("pb-out").textContent = p;
+  document.getElementById("pb-meta").textContent = `${lab(PB.level,pb.level)} · ${lab(PB.task,pb.task)} · ${PB.modes.find(m=>m[0]===pb.mode)[1]} · ${p.split(/\s+/).length} words`;
+  const q = encodeURIComponent(p);
+  document.getElementById("pb-claude").href = "https://claude.ai/new?q="+q;
+  document.getElementById("pb-gpt").href = "https://chatgpt.com/?q="+q;
+  try{ localStorage.setItem("entPromptBuilder", JSON.stringify(pb)) }catch(_){}
+}
+document.getElementById("pb").addEventListener("click", e=>{
+  const c = e.target.closest(".chip");
+  if(c){ const f=c.dataset.f, k=c.dataset.k; if(f==="ground"){ pb.ground = pb.ground.includes(k) ? pb.ground.filter(x=>x!==k) : [...pb.ground, k]; } else pb[f] = k; if(f==="task") pb.mode = TASK_MODE[c.dataset.k]; const id=c.id; renderBuilder(); document.getElementById(id).focus(); return; }
+  const x = e.target.closest("[data-ex]");
+  if(x){ pb.topic = x.dataset.ex; document.getElementById("pb-topic").value = pb.topic; updateOut(); }
+});
+document.getElementById("pb").addEventListener("input", e=>{
+  if(e.target.id==="pb-topic"){ pb.topic = e.target.value; updateOut(); }
+});
+document.getElementById("pb").addEventListener("change", e=>{
+  if(e.target.name==="pbmode"){ pb.mode = e.target.value; updateOut(); }
+  if(e.target.type==="checkbox"){ pb.extras = [...document.querySelectorAll("#pb-extras input:checked")].map(i=>i.value); updateOut(); }
+});
+document.getElementById("pb-copy").addEventListener("click", ()=>{
+  const b = document.getElementById("pb-copy"), text = buildPrompt();
+  const ok = ()=>{ b.textContent="Copied"; b.classList.add("done"); setTimeout(()=>{b.textContent="Copy prompt"; b.classList.remove("done")},1800) };
+  const fallback = ()=>{ const pre=document.getElementById("pb-out"); const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent="Selected, press copy"; };
+  try{ navigator.clipboard.writeText(text).then(ok, fallback) }catch(_){ fallback() }
+});
+document.getElementById("pb-reset").addEventListener("click", ()=>{ pb = Object.assign({}, PB_DEFAULT, {ground:[...PB_DEFAULT.ground], extras:[...PB_DEFAULT.extras]}); renderBuilder(); });
+renderBuilder();
+
+/* CASE quiz */
+const QS = [
+  {task:"A PGY-2 asks an LLM for the differential on a new neck mass before seeing the patient.", a:"C", why:"Building the differential is the reasoning we are training, and the model could produce it instead of the resident. Commit first, then compare."},
+  {task:"After reading a skull base CT, a resident asks AI for 20 comparable rare cases to review.", a:"A", why:"The resident's own read comes first; AI supplies case volume a program cannot guarantee in five years."},
+  {task:"Drafting a prior authorization letter for endoscopic sinus surgery.", a:"S", why:"Paperwork that builds no surgical competency. AI drafts; the resident checks the clinical facts before it is sent."},
+  {task:"Writing the operative plan for a revision mastoidectomy.", a:"C", why:"Operative planning is core judgment. The resident presents a plan first; AI can challenge it afterward."},
+  {task:"Templating operative notes and assigning billing codes.", a:"S", why:"Time-consuming, not a competency we certify. Surrender the draft, keep the verification."},
+  {task:"Comparing your read of atypical post-op imaging against similar cases AI surfaces.", a:"A", why:"AI cannot do the interpretation for you here; it widens the set you compare against."}
+];
+const NAMES = {C:"Conserve", A:"Augment", S:"Surrender"};
+let qi = 0, results = [];
+function renderQuiz(){
+  const el = document.getElementById("quiz");
+  const bar = `<div class="progress" aria-hidden="true">${QS.map((_,i)=>`<span class="${results[i]===true?'right':results[i]===false?'wrong':i===qi?'now':''}"></span>`).join("")}</div>`;
+  if(qi >= QS.length){
+    const n = results.filter(Boolean).length;
+    el.innerHTML = `${bar}<div class="score">${n} of ${QS.length} sorted the way CASE would</div>
+      <div class="feedback"><b>Evaluate runs through every one of these.</b>Whatever the category, the resident still appraises what the AI produced, names how it could be wrong, and decides how much to rely on it.</div>
+      <div class="row"><button class="btn" type="button" id="restart">Try again</button></div>`;
+    document.getElementById("restart").onclick = ()=>{ qi=0; results=[]; renderQuiz(); document.getElementById("quiz").scrollIntoView({block:"nearest"}) };
+    return;
+  }
+  const q = QS[qi], answered = results[qi] !== undefined;
+  el.innerHTML = `${bar}<div class="q-count">Task ${qi+1} of ${QS.length}</div><div class="q-task">${esc(q.task)}</div>
+    <div class="answers">${["C","A","S"].map(k=>`<button class="ans" type="button" id="ans-${k}" data-k="${k}" ${answered?"disabled":""}><span>${k}</span>${NAMES[k]}</button>`).join("")}</div>
+    <div id="fb"></div>`;
+}
+document.getElementById("quiz").addEventListener("click", e=>{
+  const b = e.target.closest(".ans"); if(b && !b.disabled){
+    const q = QS[qi], right = b.dataset.k === q.a; results[qi] = right;
+    document.querySelectorAll(".ans").forEach(x=>{ x.disabled = true; if(x.dataset.k===q.a) x.classList.add("is-right"); });
+    if(!right) b.classList.add("is-wrong");
+    document.querySelector(".progress").children[qi].className = right ? "right" : "wrong";
+    document.getElementById("fb").innerHTML = `<div class="feedback"><b>${right?"Right":"CASE says "+NAMES[q.a]}.</b>${esc(q.why)}</div>
+      <div class="row" style="margin-top:12px"><button class="btn" type="button" id="next">${qi===QS.length-1?"See results":"Next task"}</button></div>`;
+    document.getElementById("next").focus();
+    return;
+  }
+  if(e.target.id==="next"){ qi++; renderQuiz(); const f=document.querySelector("#quiz .ans"); if(f) f.focus(); }
+});
+renderQuiz();
+</script>
+
+</body>
+</html>
